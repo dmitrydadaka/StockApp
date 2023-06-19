@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { BsFillCaretDownFill, BsFillCaretUpFill } from 'react-icons/bs';
 import finnHub from '../apis/finnHub';
+import { WatchListContext } from '../context/watchListContext';
 
 export const StockList = () => {
     const [stocks, setStock] = useState([]);
-    const [watchList, setWatchList] = useState(['GOOGL', 'MSFT', 'AMZN']);
+    const { watchList } = useContext(WatchListContext);
+
+    const changeColor = (change) => {
+        return change > 0 ? 'success' : 'danger';
+    }
+
+    const renderIcon = (change) => {
+        return change > 0 ? <BsFillCaretUpFill /> : <BsFillCaretDownFill />;
+    }
 
     useEffect(() => {
         let isMounted = true;
@@ -21,7 +31,7 @@ export const StockList = () => {
                         symbol: response.config.params.symbol
                     }
                 })
-                console.log(data);
+                console.log(responses);
 
                 if (isMounted) setStock(data);
 
@@ -31,7 +41,7 @@ export const StockList = () => {
         }
         fetchData();
         return () => (isMounted = false);
-    }, []);
+    }, [watchList]);
 
     return (
         <div>
@@ -48,22 +58,24 @@ export const StockList = () => {
                         <th scope='col'>Close</th>
                     </tr>
                 </thead>
+                <tbody>
+                    {stocks.map(stock => {
+                        return (
+                            <tr className='table-row' key={stock.symbol}>
+                                <th scope='row'> {stock.symbol} </th>
+                                <td>{stock.data.c}</td>
+                                <td className={`text-${changeColor(stock.data.d)}`}>{stock.data.d}
+                                    {renderIcon(stock.data.d)}</td>
+                                <td className={`text-${changeColor(stock.data.d)}`}>{stock.data.dp}
+                                    {renderIcon(stock.data.d)} </td>
+                                <td>{stock.data.h}</td>
+                                <td>{stock.data.l}</td>
+                                <td>{stock.data.o}</td>
+                                <td>{stock.data.pc}</td>
+                            </tr>)
+                    })}
+                </tbody>
             </table>
-            <tbody>
-                 {stocks.map(stock => {
-                    return (
-                        <tr className='table-row' key={stock.symbol}>
-                            <th scope='row'> {stock.symbol} </th>
-                            <td>{stock.data.c}</td>
-                            <td>{stock.data.d}</td>
-                            <td>{stock.data.dp}</td>
-                            <td>{stock.data.h}</td>
-                            <td>{stock.data.l}</td>
-                            <td>{stock.data.o}</td>
-                            <td>{stock.data.pc}</td>
-                        </tr>)
-                })} 
-            </tbody>
         </div>
     )
 }
