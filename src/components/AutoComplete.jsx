@@ -1,14 +1,14 @@
-import { useState, useEffect, useContext } from "react";
-import finnHub from '../apis/finnHub';
-import { WatchListContext } from "../context/watchListContext";
+import { useState, useEffect, useContext } from "react"
+import finnHub from "../apis/finnHub"
+import { WatchListContext } from "../context/watchListContext"
 
 
 export const AutoComplete = () => {
-    const [search, setSearch] = useState('');
-    const [results, setResults] = useState([]);
-    const { addStock, deleteStock } = useContext(WatchListContext);
+    const [search, setSearch] = useState("")
+    const [results, setResults] = useState([])
+    const { addStock } = useContext(WatchListContext)
 
-    const renderDropDown = () => {
+    const renderDropdown = () => {
         const dropDownClass = search ? 'show' : null;
         return (
             <ul style={{
@@ -23,7 +23,7 @@ export const AutoComplete = () => {
                         <li onClick={() => {
                             addStock(result.symbol);
                             setSearch('');
-                            }} key={result.symbol} className='dropdown-item'>
+                        }} key={result.symbol} className='dropdown-item'>
                             {result.description} ({result.symbol})
                         </li>
                     )
@@ -37,7 +37,7 @@ export const AutoComplete = () => {
 
         const fetchData = async () => {
             try {
-                const response = finnHub.get('/search', {
+                const response = await finnHub.get('/search', {
                     params: {
                         q: search
                     }
@@ -46,7 +46,7 @@ export const AutoComplete = () => {
                     setResults(response.data.result);
                 }
             } catch (error) {
-
+                console.log(error);
             }
         }
         if (search.length > 0) {
@@ -54,7 +54,7 @@ export const AutoComplete = () => {
         } else {
             setResults([]);
         }
-        return () => isMounted = false;
+        return () => (isMounted = false);
     }, [search])
 
     return (
@@ -67,7 +67,7 @@ export const AutoComplete = () => {
                         setSearch(e.target.value);
                     }} />
                 <label htmlFor="search">Search</label>
-                {renderDropDown()}
+                {renderDropdown()}
             </div>
         </div>
     )
